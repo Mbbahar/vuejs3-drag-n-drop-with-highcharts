@@ -2,13 +2,15 @@
   <div id="app">
     <h2>VueJS 3 Highcharts Drag and Drop Demo</h2>
     <hr style="width: 200px; margin: 20px auto;">
-     <DraggableBalls />
+     <!-- <DraggableBalls /> -->
+     <GridLayout/>
   </div>
 </template>
 
 <script>
 
-import DraggableBalls from '@/components/DraggableBalls'
+// import DraggableBalls from '@/components/DraggableBalls'
+import GridLayout from '@/components/GridLayout.vue'
 
 export default {
   name: 'app',
@@ -19,7 +21,8 @@ export default {
     }
   },
   components: {
-    DraggableBalls
+    // DraggableBalls,
+    GridLayout
   },
   methods: {
     activate (elem) {
