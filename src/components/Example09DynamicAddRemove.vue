@@ -1,26 +1,48 @@
 <template>
 <div id="container">
     <div class="sideBar">
-        <button @click="addItem">Add an item dynamically</button>
+        <input type="text" placeholder="number of columns in a row" v-model="colNumber">
+
+        <button @click="addRow">Add new row</button>
+        <!-- <button @click="showModal = true">Add new row</button> -->
+
         <DraggableItem v-for="ball in availableBalls" :key="ball.id" :transferData="ball">
-            <button :class="{btnActive: selectedChart.id === ball.id}"> {{ ball.name }}</button>
+            <button> {{ ball.name }}</button>
         </DraggableItem>
     </div>
 
     <grid-layout v-model:layout="layout" :col-num="colNum" :row-height="30" :is-draggable="draggable" :is-resizable="resizable" :vertical-compact="true" :use-css-transforms="true">
+
+        <DroppableItem v-bind="{ onDragOver, onDragLeave, onDrop }">
+            <grid-item v-for="item in layout" :key="item.id" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i" :id="item.id">
+                <span :class="droppableItemClass">
+
+                    <keep-alive>
+                        <component :is="item.selectedChart.name"></component>
+                    </keep-alive>
+                </span>
+                <span class="remove" @click="removeItem(item.id)">x</span>
+            </grid-item>
+        </DroppableItem>
+    </grid-layout>
+
+    <!-- <grid-layout v-model:layout="layout" :col-num="colNum" :row-height="30" :is-draggable="draggable" :is-resizable="resizable" :vertical-compact="true" :use-css-transforms="true">
         <DroppableItem v-bind="{ onDragOver, onDragLeave, onDrop }">
 
-            <grid-item v-for="item in layout" :key="item.id" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i">
+            <grid-item v-for="item in layout" :key="item.i" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i">
                 <span :class="droppableItemClass">
 
                     <keep-alive key="selectedChart">
                         <component :is="selectedChart.name"></component>
                     </keep-alive>
                 </span>
-                <!-- <span class="remove" @click="removeItem(item.i)">x</span> -->
+                 <span class="remove" @click="removeItem(item.i)">x</span>
             </grid-item>
         </DroppableItem>
-    </grid-layout>
+    </grid-layout> -->
+
+    <SavedModal v-show="showModal" @close-modal="showModal = false" @addRow="addRow" />
+
 </div>
 </template>
 
@@ -43,6 +65,8 @@ import Chart from './Chart.vue'
 import StockChart from './StockChart'
 import MapChart from './MapChart'
 
+import SavedModal from './SavedModal.vue'
+
 export default {
     name: 'DraggableGridLayout',
     components: {
@@ -53,6 +77,7 @@ export default {
         chart: Chart,
         stockChart: StockChart,
         mapChart: MapChart,
+        SavedModal
     },
     data() {
         const balls = [{
@@ -68,38 +93,57 @@ export default {
                 name: 'mapChart'
             }
         ]
-
         const selectedBalls = ref([])
         const selectedChart = ref({
             id: 1,
             name: 'chart'
         })
 
-        const isDroppableItemActive = ref(false)
+        const isDroppableItemActive = ref(null)
+        // const isDroppableItemActive = ref(false)
         const availableBalls = computed(() => differenceBy('id', balls, selectedBalls.value))
         const droppableItemClass = computed(() => ['square', isDroppableItemActive.value && 'hover'])
-        const onDragOver = () => {
-            isDroppableItemActive.value = true
+        // const droppableItemClass = computed(() => ['square', isDroppableItemActive.value && 'hover'])
+        const onDragOver = (event) => {
+            console.log('event.target.id hover', event.target.id)
+
+            if (event.target && event.target.id) {
+                let changedItem = this.layout.find(item => item.id == event.target.id)
+                changedItem.isDroppableItemActive = true;
+                isDroppableItemActive.value = changedItem.Id
+            }
+            // isDroppableItemActive.value = true
         }
         const onDragLeave = () => isDroppableItemActive.value = false
-        const onDrop = event => {
+        const onDrop = (event) => {
+            event.preventDefault();
             const ball = JSON.parse(event.dataTransfer.getData('value'))
-            selectedChart.value = ball
-            isDroppableItemActive.value = false
+            console.log('event id drop', event.target.id)
+
+            if (event.target && event.target.id) {
+                let changedItem = this.layout.find(item => item.id == event.target.id)
+                console.log('changedItem', changedItem)
+                changedItem.selectedChart = ball;
+                changedItem.isDroppableItemActive = false;
+            }
+            // selectedChart.value = ball
+            // isDroppableItemActive.value = false
         }
         return {
-            layout: [{
-                    x: 0,
-                    y: 0,
-                    w: 2,
-                    h: 2,
-                    i: "0"
-                },
-                { x: 2, y: 0, w: 2, h: 2, i: "1" },
-                { x: 4, y: 0, w: 2, h: 2, i: "2" },
-                { x: 6, y: 0, w: 2, h: 2, i: "3" },
-                { x: 8, y: 0, w: 2, h: 2, i: "4" },
-            ],
+            layout: [],
+            //     layout: [{
+            //         id:0,
+            //         x:0,
+            //         y:0,
+            //         w:20,
+            //         h: 10,
+            //         i: 0,
+            //         selectedChart: {
+            //     id: 1,
+            //     name: 'chart'
+            // }
+            //     }
+            //     ],
             draggable: true,
             resizable: true,
             colNum: 12,
@@ -110,31 +154,51 @@ export default {
             droppableItemClass,
             onDragOver,
             onDragLeave,
-            onDrop
+            onDrop,
+            colNumber: 1,
+            showModal: false,
+            rowNumber: 1,
         }
     },
     mounted() {
         // this.$gridlayout.load();
         this.index = this.layout.length;
+        console.log('this.index', this.index)
     },
     methods: {
-        addItem: function () {
-            // Add a new item. It must have a unique key!
-            this.layout.push({
-                x: (this.layout.length * 2) % (this.colNum || 12),
-                y: this.layout.length + (this.colNum || 12),
-                // y: this.index % 6 == 0 ?
-                //  this.layout[this.index-1].y +2 :
-                //   this.layout[this.index-1].y, // puts it at the bottom
-                w: 2,
-                h: 2,
-                i: this.index,
-            });
-            // Increment the counter to ensure key is always unique.
-            this.index++;
+        addRow: function () {
+            for (let i = 0; i < this.colNumber; i++) {
+                this.layout.push({
+                    id: this.index + 1,
+                    x: i == 0 ? 0 : (12 / this.colNumber) +
+                        this.layout[i - 1].x,
+
+                    y: this.rowNumber == 1 ?
+                        (this.layout.filter(item => item.rowNum == this.rowNumber - 1)
+                            .reduce((acc, shot) => acc = acc > shot.h ? acc : shot.h, 0)) : i == 0 ?
+                        (this.layout.filter(item => item.rowNum == this.rowNumber - 1)
+                            .reduce((acc, shot) => acc = acc > shot.h ? acc : shot.h, 0)) +
+                        this.layout.find(item => item.rowNum == this.rowNumber - 1).y : this.layout.find(item => item.rowNum == this.rowNumber - 1).y,
+                    w: 12 / this.colNumber,
+                    h: 10,
+                    rowNum: this.rowNumber,
+                    selectedChart: {
+                        id: 1,
+                        name: 'chart'
+                    },
+                    i: this.index,
+                    isDroppableItemActive: false
+                });
+                this.index++;
+                this.rowNumber++;
+            }
+            this.showModal = false
+            this.colNumber = 1
+
+            console.log('this.layout', this.layout)
         },
         removeItem: function (val) {
-            const index = this.layout.map(item => item.i).indexOf(val);
+            const index = this.layout.map(item => item.id).indexOf(val);
             this.layout.splice(index, 1);
         },
     }
@@ -148,11 +212,12 @@ export default {
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: #2c3e50;
-    margin: 0 auto;
+    /* margin: 0 auto; */
     /* margin-top: 60px; */
     width: 100%;
     display: flex;
     flex-direction: row;
+    height: auto;
 }
 
 .layoutJSON {
@@ -175,14 +240,19 @@ export default {
     top: 0;
     cursor: pointer;
 }
+
 .sideBar {
-    width: 10vw;
+    width: 9vw;
     background-color: lightblue;
+    overflow: hidden;
+    margin-right: 1vw;
+    height: 100vh;
 }
 
 .vue-grid-layout {
     background: #eee;
     width: 90vw;
+    height: auto;
 }
 
 .vue-grid-item:not(.vue-grid-placeholder) {
@@ -255,13 +325,13 @@ export default {
 
 .square {
     display: inline-block;
-    width: 750px;
-    min-height: 300px;
+    width: 80%;
+    /* min-height: 300px; */
     height: auto;
     /* height: 550px; */
-    border: 1px dashed black;
-    padding: 10px;
-    margin-bottom: 100px;
+    /* border: 1px dashed black; */
+    padding: 40px;
+    /* margin-bottom: 100px; */
 }
 
 .hover {

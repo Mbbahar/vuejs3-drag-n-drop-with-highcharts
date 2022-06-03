@@ -17,7 +17,7 @@ export default {
     'onDrop'
   ],
   setup(props) {
-    const handleOnDragOver = event => {
+    const handleOnDragOver = (event) => {
       event.preventDefault()
       props.onDragOver && props.onDragOver(event)
     }
