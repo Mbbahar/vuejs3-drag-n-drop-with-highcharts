@@ -12,7 +12,9 @@
     "highcharts": "^10.1.0",
     "highcharts-vue": "^1.4.0",
     "vue": "^3.2.13",
-    "vue-grid-layout": "3.0.0-beta1"
+    "vue-grid-layout": "3.0.0-beta1",
+    "vue-resize-observer": "^2.0.15",
+    "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

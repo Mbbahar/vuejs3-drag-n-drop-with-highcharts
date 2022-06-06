@@ -1,32 +1,42 @@
 <template>
-<div id="container">
-    <div class="sideBar">
-        <input type="text" placeholder="number of columns in a row" v-model="colNumber">
+<div style="display:flex; flex-direction:column; width: 100vw">
 
-        <button @click="addRow">Add new row</button>
-        <!-- <button @click="showModal = true">Add new row</button> -->
-
-        <DraggableItem v-for="ball in availableBalls" :key="ball.id" :transferData="ball">
-            <button> {{ ball.name }}</button>
-        </DraggableItem>
+    <div class="header">
+        <span>title</span>
     </div>
+    <div id="page">
 
-    <grid-layout v-model:layout="layout" :col-num="colNum" :row-height="30" :is-draggable="draggable" :is-resizable="resizable" :vertical-compact="true" :use-css-transforms="true">
+        <div class="sideBar">
+            <!-- <input type="text" placeholder="number of columns in a row" v-model="colNumber"> -->
 
-        <DroppableItem v-bind="{ onDragOver, onDragLeave, onDrop }">
-            <grid-item v-for="item in layout" :key="item.id" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i" :id="item.id">
-                <span :class="droppableItemClass">
+            <button @click="addColumn">Add new column</button>
+            <!-- <button @click="showModal = true">Add new row</button> -->
 
-                    <keep-alive>
-                        <component :is="item.selectedChart.name"></component>
-                    </keep-alive>
-                </span>
-                <span class="remove" @click="removeItem(item.id)">x</span>
-            </grid-item>
-        </DroppableItem>
-    </grid-layout>
+            <!-- <DraggableItem v-for="ball in availableBalls" :key="ball.id" :transferData="ball">
+                <button> {{ ball.name }}</button>
+            </DraggableItem> -->
+            <draggable class="dragArea list-group" :list="list1" :group="{ name: 'people', pull: 'clone', put: false }" @change="log" item-key="name">
+                <template #item="{ element }">
+                    <div class="list-group-item">
+                        {{ element.name }}
+                    </div>
+                </template>
+            </draggable>
+        </div>
 
-    <!-- <grid-layout v-model:layout="layout" :col-num="colNum" :row-height="30" :is-draggable="draggable" :is-resizable="resizable" :vertical-compact="true" :use-css-transforms="true">
+        <div class="container" v-for="item in columns" v-bind:key="item.id">
+
+            <draggable class="dragArea list-group" :list="item.components" group="people" item-key="name" style="background-color:pink;" v-bind:style="{ 'width': item.components.length != 0 ?
+             Math.max(...item.components.map(item => item.width)) : item.width, 'height': item.height }">
+                <template #item="{ element }">
+                    <component class="resize" v-resize="onResize" :is="element.name"></component>
+
+                </template>
+            </draggable>
+
+        </div>
+
+        <!-- <grid-layout v-model:layout="layout" :col-num="colNum" :row-height="30" :is-draggable="draggable" :is-resizable="resizable" :vertical-compact="true" :use-css-transforms="true">
         <DroppableItem v-bind="{ onDragOver, onDragLeave, onDrop }">
 
             <grid-item v-for="item in layout" :key="item.i" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i">
@@ -41,16 +51,17 @@
         </DroppableItem>
     </grid-layout> -->
 
-    <SavedModal v-show="showModal" @close-modal="showModal = false" @addRow="addRow" />
+        <SavedModal v-show="showModal" @close-modal="showModal = false" @addRow="addRow" />
 
+    </div>
 </div>
 </template>
 
 <script>
-import {
-    GridLayout,
-    GridItem
-} from "vue-grid-layout"
+// import {
+//     GridLayout,
+//     GridItem
+// } from "vue-grid-layout"
 import {
     differenceBy
 } from 'lodash/fp'
@@ -58,8 +69,8 @@ import {
     computed,
     ref
 } from 'vue'
-import DraggableItem from './DraggableItem'
-import DroppableItem from './DroppableItem'
+// import DraggableItem from './DraggableItem'
+// import DroppableItem from './DroppableItem'
 
 import Chart from './Chart.vue'
 import StockChart from './StockChart'
@@ -67,17 +78,20 @@ import MapChart from './MapChart'
 
 import SavedModal from './SavedModal.vue'
 
+import draggable from "vuedraggable";
+
 export default {
     name: 'DraggableGridLayout',
     components: {
-        GridLayout,
-        GridItem,
-        DraggableItem,
-        DroppableItem,
+        // GridLayout,
+        // GridItem,
+        // DraggableItem,
+        // DroppableItem,
         chart: Chart,
         stockChart: StockChart,
         mapChart: MapChart,
-        SavedModal
+        SavedModal,
+        draggable
     },
     data() {
         const balls = [{
@@ -131,6 +145,7 @@ export default {
         }
         return {
             layout: [],
+            columns: [],
             //     layout: [{
             //         id:0,
             //         x:0,
@@ -144,7 +159,7 @@ export default {
             // }
             //     }
             //     ],
-            draggable: true,
+            draggable: false,
             resizable: true,
             colNum: 12,
             index: 0,
@@ -158,12 +173,54 @@ export default {
             colNumber: 1,
             showModal: false,
             rowNumber: 1,
+            width: 0,
+            height: 0,
+            list1: [{
+                    id: 1,
+                    name: 'chart',
+                    width: '300px',
+                    height: '300px'
+                },
+                {
+                    id: 2,
+                    name: 'stockChart',
+                    width: '300px',
+                    height: '300px'
+                },
+                {
+                    id: 3,
+                    name: 'mapChart',
+                    width: '300px',
+                    height: '300px'
+                }
+            ],
+            list2: [{
+                    name: "Juan",
+                    id: 5,
+                    width: 100,
+                    height: 5
+                },
+                {
+                    name: "Edgard",
+                    id: 6,
+                    width: 100,
+                    height: 5
+                },
+                {
+                    name: "Johnson",
+                    id: 7,
+                    width: 100,
+                    height: 5
+                }
+            ]
         }
     },
     mounted() {
         // this.$gridlayout.load();
         this.index = this.layout.length;
-        console.log('this.index', this.index)
+
+        this.width = this.$el.offsetWidth;
+        this.height = this.$el.offsetHeight;
     },
     methods: {
         addRow: function () {
@@ -197,16 +254,42 @@ export default {
 
             console.log('this.layout', this.layout)
         },
+
+        addColumn: function () {
+            this.columns.push({
+                id: this.columns.length + 1,
+                name: 'list' + (this.columns.length + 2),
+                components: [
+
+                ],
+                height: '100vh',
+                width: '400px'
+            })
+
+            console.log('this.columns', this.columns)
+        },
+        log: function (evt) {
+            window.console.log(evt);
+        },
         removeItem: function (val) {
             const index = this.layout.map(item => item.id).indexOf(val);
             this.layout.splice(index, 1);
         },
+        onResize({
+            width,
+            height
+        }) {
+            this.width = width;
+            this.height = height;
+
+            // console.log('this.columnsss', this.columns)
+        }
     }
 }
 </script>
 
 <style>
-#container {
+#page {
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -242,17 +325,55 @@ export default {
 }
 
 .sideBar {
-    width: 9vw;
-    background-color: lightblue;
-    overflow: hidden;
-    margin-right: 1vw;
     height: 100vh;
+
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    min-width: 200px !important;
+}
+
+.container {
+    width: 100%;
+    flex-direction: row;
+    /* justify-content: space-between; */
+}
+
+.header {
+    min-height: 72px;
+    height: 72px;
+    width: 90%;
+    margin-bottom: 24px !important;
+
+    /* margin: 24px 16px; */
+    background: #FFFFFF;
+    border-radius: 5px;
+
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 48px;
+
+    display: flex;
+    align-items: center;
+
+    color: #152755;
+
+    padding: 0px 56px;
+
+    box-shadow: 0px 1px 5px 0px rgba(35, 76, 162, 0.15);
 }
 
 .vue-grid-layout {
     background: #eee;
-    width: 90vw;
+    width: 100%;
     height: auto;
+    min-height: 80vh;
 }
 
 .vue-grid-item:not(.vue-grid-placeholder) {
@@ -336,5 +457,17 @@ export default {
 
 .hover {
     background-color: rgb(172, 255, 158);
+}
+
+.resize {
+    /* background-color: orange;
+    width: 300px;
+    height: 300px; */
+    margin: 10px 0px;
+    resize: both;
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 </style>
