@@ -1,35 +1,40 @@
 <template>
+<div class="sideBar">
+
+    <div v-for="page in pages" v-bind:key="page.id">
+        <button :class="[selectedPage.id == page.id ? 'sideBar-item-active': 'sideBar-item' ]" style="color:#152755" @click="selectedPage = page">
+            {{ page.name }}
+        </button>
+    </div>
+
+</div>
+<div class="sideBar" v-show="isShowingComponentsMenu" style="background-color:rgb(73, 90, 106); position:absolute;">
+    <button @click="addColumn">Add new column</button>
+    <draggable class="dragArea list-group" :list="list1" :group="{ name: 'people', pull: 'clone', put: false }" @change="log" item-key="name">
+        <template #item="{ element }">
+            <div class="list-group-item sideBar-item">
+                {{ element.name }}
+            </div>
+        </template>
+    </draggable>
+</div>
+
 <div style="display:flex; flex-direction:column; width: 100vw">
 
     <div class="header">
-        <span>title</span>
+        <span>{{selectedPage.name}}</span>
+        <div>
+            <button @click="isShowingComponentsMenu = true">Düzenle</button>
+            <button>Kaydet</button>
+        </div>
     </div>
     <div id="page">
 
-        <div class="sideBar">
-            <!-- <input type="text" placeholder="number of columns in a row" v-model="colNumber"> -->
-
-            <button @click="addColumn">Add new column</button>
-            <!-- <button @click="showModal = true">Add new row</button> -->
-
-            <!-- <DraggableItem v-for="ball in availableBalls" :key="ball.id" :transferData="ball">
-                <button> {{ ball.name }}</button>
-            </DraggableItem> -->
-            <draggable class="dragArea list-group" :list="list1" :group="{ name: 'people', pull: 'clone', put: false }" @change="log" item-key="name">
-                <template #item="{ element }">
-                    <div class="list-group-item">
-                        {{ element.name }}
-                    </div>
-                </template>
-            </draggable>
-        </div>
-
         <div class="container" v-for="item in columns" v-bind:key="item.id">
 
-            <draggable class="dragArea list-group" :list="item.components" group="people" item-key="name" style="background-color:pink;" v-bind:style="{ 'width': item.components.length != 0 ?
-             Math.max(...item.components.map(item => item.width)) : item.width, 'height': item.height }">
+            <draggable class="dragArea list-group" :list="item.components" group="people" item-key="name" style="background-color:pink; margin:0 5px; min-width:200px; min-height:200px; width:auto; height:auto;">
                 <template #item="{ element }">
-                    <component class="resize" v-resize="onResize" :is="element.name"></component>
+                    <component class="resize" v-resize="onResize" :is="element.name" @mouseenter="testFunction(item,element)"></component>
 
                 </template>
             </draggable>
@@ -107,11 +112,29 @@ export default {
                 name: 'mapChart'
             }
         ]
+        const pages = [{
+                id: 1,
+                name: 'Home'
+            },
+            {
+                id: 2,
+                name: 'Summary'
+            },
+            {
+                id: 3,
+                name: 'Training'
+            }
+        ]
+        const selectedPage = pages[0]
         const selectedBalls = ref([])
         const selectedChart = ref({
             id: 1,
             name: 'chart'
         })
+        const selectedItem = null
+        const selectedList = null
+        const changedItem = null
+        const isShowingComponentsMenu = false
 
         const isDroppableItemActive = ref(null)
         // const isDroppableItemActive = ref(false)
@@ -212,7 +235,13 @@ export default {
                     width: 100,
                     height: 5
                 }
-            ]
+            ],
+            selectedItem,
+            selectedList,
+            changedItem,
+            isShowingComponentsMenu,
+            pages,
+            selectedPage
         }
     },
     mounted() {
@@ -221,6 +250,8 @@ export default {
 
         this.width = this.$el.offsetWidth;
         this.height = this.$el.offsetHeight;
+
+        console.log('this.columns', this.columns)
     },
     methods: {
         addRow: function () {
@@ -279,10 +310,45 @@ export default {
             width,
             height
         }) {
+            // console.log('width, height', width, height)
+
             this.width = width;
             this.height = height;
 
-            // console.log('this.columnsss', this.columns)
+            // this.changedItem = {
+            //     ...this.columns.find(item => item.id == this.selectedList).components.find(item => item.id == this.selectedItem),
+            //     width: width,
+            //     height: height
+            // };
+
+            var tempArray = []
+            var tempArrayComponents = []
+
+            this.columns.forEach(list => {
+                if (list.id == this.selectedList) {
+                    list.components.forEach(item => {
+                        item.id == this.selectedItem ?
+                            item = {
+                                ...item,
+                                width: width,
+                                height: height
+                            } : item
+
+                        tempArrayComponents.push(item)
+                    })
+                    list.components = tempArrayComponents
+                }
+                tempArray.push(list)
+            })
+            console.log('tempArray', tempArray)
+            // console.log('this.columns', this.columns)
+
+        },
+        testFunction(list, element) {
+            // console.log('list', list)
+            // console.log('element', element)
+            this.selectedItem = element.id
+            this.selectedList = list.id
         }
     }
 }
@@ -335,10 +401,41 @@ export default {
     align-items: center;
 
     min-width: 200px !important;
+
+    padding-top: 100px;
+}
+
+.sideBar-item {
+    height: 40px;
+    width: 200px;
+    font-size: 20px;
+    color: #FFFFFF;
+    margin-top: 8px !important;
+    padding-left: 8px;
+
+    display: flex;
+    align-items: center;
+
+}
+
+.sideBar-item:hover {
+    background-color: coral;
+}
+
+.sideBar-item-active {
+    height: 40px;
+    width: 200px;
+    font-size: 20px;
+    color: #FFFFFF;
+    margin-top: 8px !important;
+    padding-left: 8px;
+
+    display: flex;
+    align-items: center;
+    background-color: blueviolet;
 }
 
 .container {
-    width: 100%;
     flex-direction: row;
     /* justify-content: space-between; */
 }
@@ -361,6 +458,7 @@ export default {
 
     display: flex;
     align-items: center;
+    justify-content: space-between;
 
     color: #152755;
 

@@ -266,6 +266,7 @@ export default {
 </script>
  <style scoped>
 .map {
+  min-width: 400px;
   /* min-height: 500px; */
 }
  </style>

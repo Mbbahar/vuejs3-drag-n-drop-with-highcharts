@@ -29,7 +29,7 @@ export default {
 </script>
 <style scoped>
 .stock {
-  width: 70%;
-  margin: 0 auto
+  /* width: 70%;
+  margin: 0 auto */
 }
 </style>
