@@ -1,15 +1,11 @@
 <template>
 <div id="app">
-    <!-- <h2>VueJS 3 Highcharts Drag and Drop Demo</h2> -->
-    <!-- <hr style="width: 500px; margin: 20px auto;"> -->
-    <!-- <DraggableBalls /> -->
     <DraggableGridLayout />
 </div>
 </template>
 
 <script>
-// import DraggableBalls from '@/components/DraggableBalls'
-import DraggableGridLayout from '@/components/Example09DynamicAddRemove.vue'
+import DraggableGridLayout from '@/components/DynamicAddRemove.vue'
 
 export default {
     name: 'app',
@@ -20,7 +16,6 @@ export default {
         }
     },
     components: {
-        // DraggableBalls,
         DraggableGridLayout
     },
     methods: {
@@ -50,8 +45,6 @@ export default {
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: #2c3e50;
-    /* margin: 0 auto; */
-    /* margin-top: 60px; */
     width: 100%;
     display: flex;
     flex-direction: row;
