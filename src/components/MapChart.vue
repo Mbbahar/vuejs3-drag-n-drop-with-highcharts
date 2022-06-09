@@ -8,7 +8,7 @@ export default {
     return {
       mapOptions: {
         chart: {
-          map: 'myMapName'
+          map: 'myMapName',
         },
         title: {
           text: 'Highmaps basic demo'
@@ -16,6 +16,7 @@ export default {
         subtitle: {
           text: 'Source map: <a href="http://code.highcharts.com/mapdata/custom/world.js">World, Miller projection, medium resolution</a>'
         },
+        reflow: true,
         mapNavigation: {
           enabled: true,
           buttonOptions: {
@@ -255,11 +256,17 @@ export default {
         }]
       }
     }
-  }
+  },
+  methods: {
+    changeContainerWidth() {
+      console.log(this);
+    }
+  },
 }
 </script>
  <style scoped>
 .map {
-  min-height: 500px;
+  min-width: 400px;
+  /* min-height: 500px; */
 }
  </style>
