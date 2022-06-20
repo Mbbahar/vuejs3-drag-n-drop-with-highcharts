@@ -1,11 +1,13 @@
 <template>
 <div id="app">
-    <DraggableGridLayout />
+    <!-- <DraggableGridLayout /> -->
+    <RenderFromJson/>
 </div>
 </template>
 
 <script>
-import DraggableGridLayout from '@/components/DynamicAddRemove.vue'
+// import DraggableGridLayout from '@/components/DynamicAddRemove.vue'
+import RenderFromJson from '@/components/RenderFromJson.vue'
 
 export default {
     name: 'app',
@@ -16,7 +18,8 @@ export default {
         }
     },
     components: {
-        DraggableGridLayout
+        // DraggableGridLayout,
+        RenderFromJson
     },
     methods: {
         activate(elem) {

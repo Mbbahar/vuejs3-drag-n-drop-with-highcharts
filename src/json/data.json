@@ -1,0 +1,79 @@
+{
+  "title": "Securities Finance Trade Entry",
+  "children": [
+    {
+      "containerType": "Tabs",
+      "children": [
+        {
+          "title": "Common",
+          "children": [
+            {
+              "containerType": "Row",
+              "children": [
+                {
+                  "input": "ComboBox",
+                  "label": "Trade Type",
+                  "options": ["Repo", "Buy/Sell", "FeeBased"]
+                },
+                {
+                  "input": "ComboBox",
+                  "label": "Direction",
+                  "options": ["Loan", "Borrow"]
+                }
+              ]
+            },
+            {
+              "containerType": "Row",
+              "children": [
+                {
+                  "containerType": "Column",
+                  "children": [
+                    {
+                      "containerType": "Row",
+                      "children": [
+                        {
+                          "input": "Text",
+                          "label": "Book"
+                        },
+                        {
+                          "input": "Text",
+                          "label": "Counterparty"
+                        }
+                      ]
+                    },
+                    {
+                      "containerType": "Row",
+                      "children": [
+                        {
+                          "input": "Date",
+                          "label": "StartDate"
+                        },
+                        {
+                          "input": "Date",
+                          "label": "EndDate"
+                        }
+                      ]
+                    },
+                    {
+                      "containerType": "Row",
+                      "children": [
+                        {
+                          "input": "Text",
+                          "label": "Security"
+                        },
+                        {
+                          "input": "Numeric",
+                          "label": "Quantity"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
